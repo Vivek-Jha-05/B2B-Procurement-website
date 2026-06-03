@@ -1,21 +1,21 @@
-import 'dotenv/config';
-import express, { Request, Response, NextFunction } from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import compression from 'compression';
-import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
-import mongoSanitize from 'express-mongo-sanitize';
-import rateLimit from 'express-rate-limit';
+import "dotenv/config";
+import express, { Request, Response, NextFunction } from "express";
+import helmet from "helmet";
+import cors from "cors";
+import compression from "compression";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import mongoSanitize from "express-mongo-sanitize";
+import rateLimit from "express-rate-limit";
 
-import connectDB from './config/db';
-import errorHandler from './middleware/errorHandler';
+import connectDB from "./config/db";
+import errorHandler from "./middleware/errorHandler";
 
-import authRoutes from './routes/auth';
-import productRoutes from './routes/products';
-import leadRoutes from './routes/leads';
-import contactRoutes from './routes/contact';
-import certificationRoutes from './routes/certifications';
+import authRoutes from "./routes/auth";
+import productRoutes from "./routes/products";
+import leadRoutes from "./routes/leads";
+import contactRoutes from "./routes/contact";
+import certificationRoutes from "./routes/certifications";
 
 const app = express();
 
@@ -28,22 +28,32 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
-        styleSrc: ["'self'", 'https://fonts.googleapis.com'],
-        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-        imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com', 'https://images.unsplash.com'],
-        connectSrc: ["'self'"],
+        styleSrc: ["'self'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https://res.cloudinary.com",
+          "https://images.unsplash.com",
+        ],
+        connectSrc: [
+          "'self'",
+          "https://b2b-procurement-website-production.up.railway.app",
+          "https://b2-b-procurement-website.vercel.app",
+        ],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
-        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
+        upgradeInsecureRequests:
+          process.env.NODE_ENV === "production" ? [] : null,
       },
     },
     crossOriginEmbedderPolicy: false, // Cloudinary images need this off
-  })
+  }),
 );
 
 // Parse allowed origins — supports comma-separated list for multiple Vercel previews
-const rawOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:5173';
-const allowedOrigins = rawOrigin.split(',').map((o) => o.trim());
+const rawOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5173";
+const allowedOrigins = rawOrigin.split(",").map((o) => o.trim());
 
 app.use(
   cors({
@@ -54,27 +64,27 @@ app.use(
       callback(new Error(`CORS: Origin ${origin} not allowed`));
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
 );
 
 // ──────────────────────────────────────────────
 // Parsing & compression middleware
 // ──────────────────────────────────────────────
 app.use(compression());
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 
 // ──────────────────────────────────────────────
 // Request logging
 // ──────────────────────────────────────────────
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   // Combined format for production log aggregation (Railway, Datadog, etc.)
-  app.use(morgan('combined'));
+  app.use(morgan("combined"));
 } else {
-  app.use(morgan('dev'));
+  app.use(morgan("dev"));
 }
 
 // ──────────────────────────────────────────────
@@ -93,9 +103,9 @@ const globalRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: {
-    error: 'Too many requests, please try again later.',
+    error: "Too many requests, please try again later.",
   },
-  skip: (req) => req.path === '/api/health',
+  skip: (req) => req.path === "/api/health",
 });
 
 // Stricter limit for auth: 10 req / 1 hr
@@ -105,7 +115,7 @@ const authRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: {
-    error: 'Too many login attempts. Please try again in an hour.',
+    error: "Too many login attempts. Please try again in an hour.",
   },
 });
 
@@ -116,51 +126,49 @@ const contactRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: {
-    error: 'Too many submissions. Please try again later.',
+    error: "Too many submissions. Please try again later.",
   },
 });
 
-app.use('/api', globalRateLimit);
+app.use("/api", globalRateLimit);
 
 // ──────────────────────────────────────────────
 // Health check
 // ──────────────────────────────────────────────
-app.get('/api/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get("/api/health", (_req: Request, res: Response) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
 // ──────────────────────────────────────────────
 // Routes
 // ──────────────────────────────────────────────
-app.use('/api/auth/login', authRateLimit);
-app.use('/api/auth', authRoutes);
+app.use("/api/auth/login", authRateLimit);
+app.use("/api/auth", authRoutes);
 
-app.use('/api/products', productRoutes);
+app.use("/api/products", productRoutes);
 
-app.use('/api/leads', leadRoutes);
+app.use("/api/leads", leadRoutes);
 
-app.use('/api/contact', contactRateLimit, contactRoutes);
+app.use("/api/contact", contactRateLimit, contactRoutes);
 
-app.use('/api/certifications', certificationRoutes);
+app.use("/api/certifications", certificationRoutes);
 
 // 404 handler for unmatched API routes
-app.use('/api/*', (_req: Request, res: Response) => {
-  res.status(404).json({ error: 'API endpoint not found' });
+app.use("/api/*", (_req: Request, res: Response) => {
+  res.status(404).json({ error: "API endpoint not found" });
 });
 
 // ──────────────────────────────────────────────
 // Global error handler (must be last)
 // ──────────────────────────────────────────────
-app.use(
-  (err: Error, req: Request, res: Response, next: NextFunction): void => {
-    errorHandler(err, req, res, next);
-  }
-);
+app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
+  errorHandler(err, req, res, next);
+});
 
 // ──────────────────────────────────────────────
 // Start server
 // ──────────────────────────────────────────────
-const PORT = parseInt(process.env.PORT || '3001', 10);
+const PORT = parseInt(process.env.PORT || "3001", 10);
 
 const startServer = async (): Promise<void> => {
   try {
@@ -168,23 +176,23 @@ const startServer = async (): Promise<void> => {
 
     app.listen(PORT, () => {
       console.log(
-        `🚀 ProSource API running on http://localhost:${PORT} [${process.env.NODE_ENV || 'development'}]`
+        `🚀 ProSource API running on http://localhost:${PORT} [${process.env.NODE_ENV || "development"}]`,
       );
     });
   } catch (err) {
-    console.error('❌ Failed to start server:', err);
+    console.error("❌ Failed to start server:", err);
     process.exit(1);
   }
 };
 
 // Handle unhandled rejections
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
   process.exit(1);
 });
 
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
   process.exit(1);
 });
 
