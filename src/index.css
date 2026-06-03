@@ -1,0 +1,207 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #FFFAEC;
+  --color-sand: #F5ECD5;
+  --color-teal: #578E7E;
+  --color-teal-dark: #3a6b5e;
+  --color-teal-light: #6aab99;
+  --color-charcoal: #3D3D3D;
+  --color-charcoal-light: #5a5a5a;
+  --color-charcoal-muted: #8a8a8a;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #FFFAEC;
+  color: #3D3D3D;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F5ECD5;
+}
+::-webkit-scrollbar-thumb {
+  background: #578E7E;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a6b5e;
+}
+
+/* Selection */
+::selection {
+  background: #578E7E;
+  color: #FFFAEC;
+}
+
+/* Smooth transitions globally */
+a, button {
+  transition: all 0.2s ease;
+}
+
+/* Typography utilities */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Section padding utility */
+.section-pad {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+@media (min-width: 768px) {
+  .section-pad {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+  }
+}
+
+/* Divider line */
+.divider {
+  width: 3rem;
+  height: 2px;
+  background: #578E7E;
+  margin-bottom: 1.5rem;
+}
+
+/* Card hover */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(61, 61, 61, 0.1);
+}
+
+/* Focus ring */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  ring: 2px solid #578E7E;
+}
+
+/* Admin panel styles */
+.admin-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #5a5a5a;
+  transition: all 0.2s ease;
+}
+.admin-sidebar-link:hover {
+  background: #F5ECD5;
+  color: #578E7E;
+}
+.admin-sidebar-link.active {
+  background: #578E7E;
+  color: #FFFAEC;
+}
+
+/* Status badge */
+.badge-new {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.badge-contacted {
+  background: #fef9c3;
+  color: #a16207;
+}
+.badge-closed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* Animated underline */
+.animated-underline {
+  position: relative;
+  display: inline-block;
+}
+.animated-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #578E7E;
+  transition: width 0.3s ease;
+}
+.animated-underline:hover::after {
+  width: 100%;
+}
+
+/* Infinite horizontal marquee */
+@keyframes marquee-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+.marquee-left {
+  animation: marquee-left 40s linear infinite;
+}
+.marquee-right {
+  animation: marquee-right 45s linear infinite;
+}
+.marquee-left:hover,
+.marquee-right:hover {
+  animation-play-state: paused;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 30, 30, 0.55);
+  backdrop-filter: blur(6px);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.modal-card {
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Line clamp utilities */
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-4 { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
