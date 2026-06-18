@@ -102,13 +102,14 @@ export const mockCertifications: Certification[] = [
 
 export const productCategories = [
   'All',
-  'Safety & PPE',
-  'Office Supplies',
-  'Technology',
-  'Facility Management',
-  'Electrical & Mechanical',
-  'Logistics & Packaging',
+  'Adhesives & Sealants',
+  'Coatings & Paints',
+  'Lubricants, Oils, & Greases',
+  'Mechanical Items & Consumables',
+  'Cleaners & NDT Chemicals',
+  'Tapes',
 ];
+
 
 export const clientLogos = [
   { name: 'Tata Group', abbr: 'TATA' },

@@ -176,7 +176,7 @@ const startServer = async (): Promise<void> => {
 
     app.listen(PORT, () => {
       console.log(
-        `🚀 ProSource API running on http://localhost:${PORT} [${process.env.NODE_ENV || "development"}]`,
+        `🚀 APR Services API running on http://localhost:${PORT} [${process.env.NODE_ENV || "development"}]`,
       );
     });
   } catch (err) {

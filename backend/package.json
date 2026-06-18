@@ -1,7 +1,7 @@
 {
-  "name": "prosource-backend",
+  "name": "APR Services-backend",
   "version": "1.0.0",
-  "description": "ProSource Enterprise B2B Procurement API",
+  "description": "APR Services Enterprise B2B Procurement API",
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",

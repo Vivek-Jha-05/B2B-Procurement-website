@@ -56,7 +56,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title, subtitle }) 
               <span className="text-[#FFFAEC] font-bold text-xs">PS</span>
             </div>
             <div>
-              <div className="font-bold text-[#3D3D3D] text-sm">ProSource</div>
+              <div className="font-bold text-[#3D3D3D] text-sm">APR Services</div>
               <div className="text-[0.6rem] text-[#578E7E] uppercase tracking-wider">Admin Panel</div>
             </div>
           </Link>

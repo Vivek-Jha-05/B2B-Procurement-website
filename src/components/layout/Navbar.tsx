@@ -3,14 +3,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Button from '../ui/Button';
-
 const navLinks = [
   { label: 'Home', href: '/' },
-  { label: 'About', href: '/#about' },
-  { label: 'Services', href: '/#services' },
   { label: 'Products', href: '/products', isRoute: true },
-  { label: 'Process', href: '/#process' },
-  { label: 'Contact', href: '/#contact' },
+  { label: 'Contact', href: '/contact', isRoute: true },
 ];
 
 const Navbar: React.FC = () => {
@@ -75,7 +71,7 @@ const Navbar: React.FC = () => {
               <span className="text-[#FFFAEC] font-bold text-sm tracking-tight">PS</span>
             </div>
             <div className="flex flex-col leading-none">
-              <span className="font-bold text-[#3D3D3D] text-base tracking-tight">ProSource</span>
+              <span className="font-bold text-[#3D3D3D] text-base tracking-tight">APR Services</span>
               <span className="text-[0.65rem] text-[#578E7E] tracking-[0.12em] uppercase font-medium">Enterprise</span>
             </div>
           </Link>
@@ -111,14 +107,11 @@ const Navbar: React.FC = () => {
 
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center gap-3">
-            <a
-              href="/#contact"
-              onClick={(e) => handleNavClick(e, '/#contact')}
-            >
+            <Link to="/contact">
               <Button variant="primary" size="sm">
-                Request a Quote
+                Request Quote
               </Button>
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Toggle */}
@@ -162,11 +155,11 @@ const Navbar: React.FC = () => {
               )
             )}
           <div className="pt-3 border-t border-[#F5ECD5]">
-            <a href="/#contact" onClick={(e) => handleNavClick(e, '/#contact')}>
+            <Link to="/contact" onClick={() => setMobileOpen(false)}>
               <Button variant="primary" size="sm" className="w-full">
-                Request a Quote
+                Request Quote
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

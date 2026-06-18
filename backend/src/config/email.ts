@@ -1,5 +1,5 @@
 /**
- * email.ts — ProSource Email Service
+ * email.ts — APR Services Email Service
  *
  * Uses the official Resend Node.js SDK (HTTP API) instead of Nodemailer SMTP.
  * This gives proper error messages, delivery receipts, and sandbox awareness.
@@ -55,7 +55,7 @@ async function sendEmail(opts: {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: `ProSource Enterprise <${FROM}>`,
+      from: `APR Services Enterprise <${FROM}>`,
       to: actualTo,
       subject: actualSubject,
       html,
@@ -84,7 +84,7 @@ export const sendContactConfirmation = async (lead: ILead): Promise<void> => {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Enquiry Received - ProSource Enterprise</title>
+      <title>Enquiry Received - APR Services Enterprise</title>
     </head>
     <body style="margin:0;padding:0;background:#f0f0f0;font-family:Inter,-apple-system,Arial,sans-serif;">
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:40px 0;">
@@ -99,7 +99,7 @@ export const sendContactConfirmation = async (lead: ILead): Promise<void> => {
                   <div style="width:48px;height:48px;background:rgba(255,255,255,0.15);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;">
                     <span style="color:#ffffff;font-weight:800;font-size:18px;letter-spacing:-0.5px;">PS</span>
                   </div>
-                  <h1 style="color:#ffffff;margin:0 0 6px;font-size:24px;font-weight:700;letter-spacing:-0.5px;">ProSource Enterprise</h1>
+                  <h1 style="color:#ffffff;margin:0 0 6px;font-size:24px;font-weight:700;letter-spacing:-0.5px;">APR Services Enterprise</h1>
                   <p style="color:rgba(255,255,255,0.65);margin:0;font-size:13px;">B2B Procurement Partner</p>
                 </td>
               </tr>
@@ -158,7 +158,7 @@ export const sendContactConfirmation = async (lead: ILead): Promise<void> => {
                     <a href="tel:+911140001000" style="color:#578E7E;font-weight:600;">+91 114 000 1000</a>
                     <br><br>
                     Best regards,<br>
-                    <strong style="color:#3D3D3D;">The ProSource Procurement Team</strong>
+                    <strong style="color:#3D3D3D;">The APR Services Procurement Team</strong>
                   </p>
                 </td>
               </tr>
@@ -167,7 +167,7 @@ export const sendContactConfirmation = async (lead: ILead): Promise<void> => {
               <tr>
                 <td style="background:#f8f8f8;padding:20px 48px;border-top:1px solid #eee;">
                   <p style="color:#aaa;font-size:11px;margin:0;text-align:center;line-height:1.6;">
-                    © ${new Date().getFullYear()} ProSource Enterprise. All rights reserved.<br>
+                    © ${new Date().getFullYear()} APR Services Enterprise. All rights reserved.<br>
                     12th Floor, Tower B, DLF Cyber City, Gurugram, Haryana – 122002
                   </p>
                 </td>
@@ -183,7 +183,7 @@ export const sendContactConfirmation = async (lead: ILead): Promise<void> => {
 
   await sendEmail({
     to: lead.email,
-    subject: `✅ Enquiry Received — ProSource Enterprise`,
+    subject: `✅ Enquiry Received — APR Services Enterprise`,
     html,
     label: 'CustomerConfirmation',
   });
@@ -198,7 +198,7 @@ export const sendAdminNotification = async (lead: ILead): Promise<void> => {
     <html>
     <head>
       <meta charset="utf-8">
-      <title>New Lead — ProSource</title>
+      <title>New Lead — APR Services</title>
     </head>
     <body style="margin:0;padding:0;background:#f0f0f0;font-family:Inter,-apple-system,Arial,sans-serif;">
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f0f0;padding:40px 0;">
@@ -239,7 +239,7 @@ export const sendAdminNotification = async (lead: ILead): Promise<void> => {
                   </table>
 
                   <div style="margin-top:28px;text-align:center;">
-                    <a href="mailto:${lead.email}?subject=Re: Your ProSource Procurement Enquiry&body=Dear ${lead.name},%0A%0AThank you for your enquiry."
+                    <a href="mailto:${lead.email}?subject=Re: Your APR Services Procurement Enquiry&body=Dear ${lead.name},%0A%0AThank you for your enquiry."
                       style="display:inline-block;background:#578E7E;color:#fff;padding:13px 32px;border-radius:8px;
                              text-decoration:none;font-weight:600;font-size:14px;letter-spacing:0.3px;">
                       Reply to ${lead.name}
@@ -252,7 +252,7 @@ export const sendAdminNotification = async (lead: ILead): Promise<void> => {
               <tr>
                 <td style="background:#f8f8f8;padding:16px 40px;border-top:1px solid #eee;">
                   <p style="color:#aaa;font-size:11px;margin:0;text-align:center;">
-                    ProSource Enterprise Internal Notification — Do not forward
+                    APR Services Enterprise Internal Notification — Do not forward
                   </p>
                 </td>
               </tr>

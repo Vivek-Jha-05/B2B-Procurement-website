@@ -1,14 +1,12 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Search, Filter, X, Tag, ChevronLeft, ChevronRight,
-  Send, CheckCircle, Building2, Mail, Phone, User, MessageSquare,
-  ArrowLeft, Loader2, ArrowRight, Package, ZoomIn
+  ArrowLeft, ArrowRight, ZoomIn
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { useAdmin } from '../context/AdminContext';
-import { submitQuoteRequest } from '../api/contact';
 import type { Product } from '../types';
 import { productCategories } from '../data/mockData';
 import { cn } from '../utils/cn';
@@ -16,353 +14,9 @@ import { cn } from '../utils/cn';
 const ITEMS_PER_PAGE = 12;
 
 /* ════════════════════════════════════════════════════════
-   QUOTE FORM  — rendered inside the detail drawer
+   PRODUCT CARD  — compact grid card linking to detail page
    ════════════════════════════════════════════════════════ */
-interface QuoteFormProps {
-  product: Product;
-  onSuccess: () => void;
-}
-
-const QuoteForm: React.FC<QuoteFormProps> = ({ product, onSuccess }) => {
-  const [form, setForm] = useState({ name: '', company: '', email: '', phone: '', message: '' });
-  const [errors, setErrors] = useState<Partial<typeof form>>({});
-  const [submitting, setSubmitting] = useState(false);
-
-  const validate = () => {
-    const e: Partial<typeof form> = {};
-    if (form.name.trim().length < 2) e.name = 'Name required (min 2 chars)';
-    if (form.company.trim().length < 2) e.company = 'Company name required';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Valid email required';
-    if (!/^\+?[\d\s\-().]{10,}$/.test(form.phone)) e.phone = 'Valid phone required';
-    if (form.message.trim().length < 10) e.message = 'Min 10 characters';
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setSubmitting(true);
-    try {
-      await submitQuoteRequest({
-        ...form,
-        productName: product.name,
-        productCategory: product.category,
-      });
-      onSuccess();
-    } catch (err) {
-      setErrors({ message: err instanceof Error ? err.message : 'Submission failed. Try again.' });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const field = (
-    name: keyof typeof form,
-    label: string,
-    icon: React.ReactNode,
-    type = 'text',
-    placeholder = ''
-  ) => (
-    <div>
-      <label className="block text-xs font-semibold text-[#5a5a5a] mb-1 uppercase tracking-wide">
-        {label} <span className="text-red-400">*</span>
-      </label>
-      <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#578E7E]/60">{icon}</span>
-        <input
-          type={type}
-          value={form[name]}
-          onChange={e => setForm(f => ({ ...f, [name]: e.target.value }))}
-          placeholder={placeholder}
-          className={cn(
-            'w-full pl-9 pr-4 py-2.5 text-sm border rounded-lg bg-white transition-all outline-none',
-            errors[name]
-              ? 'border-red-400 focus:ring-2 focus:ring-red-100'
-              : 'border-[#e0d8c8] focus:border-[#578E7E] focus:ring-2 focus:ring-[#578E7E]/15'
-          )}
-        />
-      </div>
-      {errors[name] && <p className="text-red-400 text-xs mt-1">{errors[name]}</p>}
-    </div>
-  );
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="flex items-start gap-2 bg-[#578E7E]/8 border border-[#578E7E]/20 rounded-lg px-3 py-2.5">
-        <Package size={14} className="text-[#578E7E] mt-0.5 flex-shrink-0" />
-        <p className="text-xs text-[#5a5a5a] leading-relaxed">
-          Your enquiry will be linked to <strong className="text-[#3D3D3D]">{product.name}</strong>. Just fill in your contact details below.
-        </p>
-      </div>
-
-      {field('name', 'Your Name', <User size={14} />, 'text', 'e.g. Rajesh Kumar')}
-      {field('company', 'Company', <Building2 size={14} />, 'text', 'e.g. Tata Consultancy')}
-      {field('email', 'Work Email', <Mail size={14} />, 'email', 'e.g. rajesh@company.com')}
-      {field('phone', 'Phone', <Phone size={14} />, 'tel', 'e.g. +91 98765 43210')}
-
-      <div>
-        <label className="block text-xs font-semibold text-[#5a5a5a] mb-1 uppercase tracking-wide">
-          Requirements <span className="text-red-400">*</span>
-        </label>
-        <div className="relative">
-          <MessageSquare size={14} className="absolute left-3 top-3 text-[#578E7E]/60" />
-          <textarea
-            value={form.message}
-            onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-            rows={3}
-            placeholder="Quantity needed, delivery timeline, special specs…"
-            className={cn(
-              'w-full pl-9 pr-4 py-2.5 text-sm border rounded-lg bg-white resize-none transition-all outline-none',
-              errors.message
-                ? 'border-red-400 focus:ring-2 focus:ring-red-100'
-                : 'border-[#e0d8c8] focus:border-[#578E7E] focus:ring-2 focus:ring-[#578E7E]/15'
-            )}
-          />
-        </div>
-        {errors.message && <p className="text-red-400 text-xs mt-1">{errors.message}</p>}
-      </div>
-
-      {/* Honeypot */}
-      <input type="text" name="honeypot" style={{ display: 'none' }} tabIndex={-1} readOnly />
-
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full flex items-center justify-center gap-2 py-3 bg-[#578E7E] text-white font-semibold rounded-lg hover:bg-[#3a6b5e] disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md text-sm"
-      >
-        {submitting
-          ? <><Loader2 size={15} className="animate-spin" /> Sending…</>
-          : <><Send size={14} /> Send Quote Request</>}
-      </button>
-    </form>
-  );
-};
-
-/* ════════════════════════════════════════════════════════
-   PRODUCT DETAIL DRAWER  — slides in from the right
-   ════════════════════════════════════════════════════════ */
-interface DetailDrawerProps {
-  product: Product;
-  onClose: () => void;
-}
-
-const DetailDrawer: React.FC<DetailDrawerProps> = ({ product, onClose }) => {
-  const [showQuoteForm, setShowQuoteForm] = useState(false);
-  const [quoteSuccess, setQuoteSuccess] = useState(false);
-  const [imageZoomed, setImageZoomed] = useState(false);
-  const [visible, setVisible] = useState(false);
-
-  // Animate in
-  useEffect(() => {
-    requestAnimationFrame(() => setVisible(true));
-  }, []);
-
-  // Close on Escape
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
-  // Lock body scroll
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
-  }, []);
-
-  const handleClose = () => {
-    setVisible(false);
-    setTimeout(onClose, 280);
-  };
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        className={cn(
-          'fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-280',
-          visible ? 'opacity-100' : 'opacity-0'
-        )}
-        onClick={handleClose}
-      />
-
-      {/* Drawer panel */}
-      <div
-        className={cn(
-          'fixed top-0 right-0 h-full z-50 w-full sm:w-[480px] lg:w-[540px]',
-          'bg-white shadow-2xl overflow-y-auto flex flex-col',
-          'transition-transform duration-300 ease-out',
-          visible ? 'translate-x-0' : 'translate-x-full'
-        )}
-      >
-        {/* ── Header ── */}
-        <div className="sticky top-0 z-10 bg-white border-b border-[#F5ECD5] px-5 py-4 flex items-center justify-between gap-3">
-          <button
-            onClick={handleClose}
-            className="flex items-center gap-1.5 text-sm text-[#7a7a7a] hover:text-[#3D3D3D] transition-colors"
-          >
-            <ArrowLeft size={15} /> Back
-          </button>
-          <span className="text-xs font-semibold text-[#578E7E] uppercase tracking-wider">Product Detail</span>
-          <button
-            onClick={handleClose}
-            className="p-1.5 rounded-lg hover:bg-[#F5ECD5] text-[#8a8a8a] hover:text-[#3D3D3D] transition-colors"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        {/* ── Product Image ── */}
-        <div
-          className="relative overflow-hidden bg-[#F5ECD5] cursor-zoom-in"
-          style={{ height: '260px' }}
-          onClick={() => setImageZoomed(true)}
-        >
-          {product.imageUrl ? (
-            <>
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 text-white text-xs px-2.5 py-1 rounded-full">
-                <ZoomIn size={11} /> Tap to zoom
-              </div>
-            </>
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Tag size={48} className="text-[#578E7E]/25" />
-            </div>
-          )}
-          {/* Category badge */}
-          <div className="absolute top-3 left-3">
-            <span className="text-xs px-3 py-1 bg-[#578E7E] text-white rounded-full font-semibold shadow-sm">
-              {product.category}
-            </span>
-          </div>
-        </div>
-
-        {/* ── Product Info ── */}
-        <div className="px-5 pt-5 pb-3">
-          <h2 className="text-xl font-bold text-[#3D3D3D] leading-snug mb-3">
-            {product.name}
-          </h2>
-
-          <div className="mb-4">
-            <h3 className="text-xs font-bold text-[#5a5a5a] uppercase tracking-wider mb-2">
-              Product Description
-            </h3>
-            <p className="text-sm text-[#5a5a5a] leading-relaxed">
-              {product.description}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2 mb-5">
-            <div className="flex items-center gap-1.5 text-xs text-[#578E7E] bg-[#578E7E]/8 border border-[#578E7E]/20 px-3 py-1.5 rounded-full font-medium">
-              <Package size={11} /> B2B Procurement
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-[#578E7E] bg-[#578E7E]/8 border border-[#578E7E]/20 px-3 py-1.5 rounded-full font-medium">
-              ✓ Verified Suppliers
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-[#578E7E] bg-[#578E7E]/8 border border-[#578E7E]/20 px-3 py-1.5 rounded-full font-medium">
-              ✓ Bulk Orders Welcome
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-[#F5ECD5] mb-5" />
-
-          {/* ── Quote Section ── */}
-          {quoteSuccess ? (
-            <div className="text-center py-8">
-              <div className="w-14 h-14 bg-[#578E7E]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle size={28} className="text-[#578E7E]" />
-              </div>
-              <h3 className="font-bold text-[#3D3D3D] text-lg mb-2">Quote Request Sent!</h3>
-              <p className="text-sm text-[#7a7a7a] mb-5">
-                Our procurement team will review your enquiry for <strong>{product.name}</strong> and reach out within 1–2 business days.
-              </p>
-              <button
-                onClick={handleClose}
-                className="px-6 py-2.5 bg-[#578E7E] text-white text-sm font-semibold rounded-lg hover:bg-[#3a6b5e] transition-colors"
-              >
-                Done
-              </button>
-            </div>
-          ) : !showQuoteForm ? (
-            /* CTA to open form */
-            <div>
-              <h3 className="text-sm font-bold text-[#3D3D3D] mb-1">Interested in this product?</h3>
-              <p className="text-xs text-[#7a7a7a] mb-4">
-                Fill a quick form and our team will send you a personalised quote with pricing, availability, and delivery timelines.
-              </p>
-              <button
-                onClick={() => setShowQuoteForm(true)}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#578E7E] text-white font-bold rounded-lg hover:bg-[#3a6b5e] transition-all shadow-md hover:shadow-lg text-sm group"
-              >
-                <Send size={15} />
-                Request a Quote for This Product
-                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-          ) : (
-            /* Quote Form */
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-[#3D3D3D]">Request a Quote</h3>
-                <button
-                  onClick={() => setShowQuoteForm(false)}
-                  className="text-xs text-[#8a8a8a] hover:text-[#578E7E] transition-colors"
-                >
-                  ← Back to details
-                </button>
-              </div>
-              <QuoteForm
-                product={product}
-                onSuccess={() => setQuoteSuccess(true)}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Bottom padding */}
-        <div className="h-8" />
-      </div>
-
-      {/* Zoomed image lightbox */}
-      {imageZoomed && product.imageUrl && (
-        <div
-          className="fixed inset-0 z-[70] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
-          onClick={() => setImageZoomed(false)}
-        >
-          <button
-            onClick={() => setImageZoomed(false)}
-            className="absolute top-4 right-4 p-2 bg-white/20 rounded-full text-white hover:bg-white/30 transition-colors"
-          >
-            <X size={20} />
-          </button>
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="max-w-full max-h-full rounded-xl object-contain shadow-2xl"
-          />
-        </div>
-      )}
-    </>
-  );
-};
-
-/* ════════════════════════════════════════════════════════
-   PRODUCT CARD  — compact grid card, click → detail drawer
-   ════════════════════════════════════════════════════════ */
-interface ProductCardProps {
-  product: Product;
-  onView: (p: Product) => void;
-  delay: number;
-}
-
-const ProductCard: React.FC<ProductCardProps> = ({ product, onView, delay }) => {
+const ProductCard: React.FC<{ product: Product; delay: number }> = ({ product, delay }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
 
@@ -370,7 +24,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onView, delay }) => 
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setInView(true); observer.disconnect(); } },
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
       { threshold: 0.08 }
     );
     observer.observe(el);
@@ -378,18 +37,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onView, delay }) => 
   }, []);
 
   return (
-    <div
+    <Link
       ref={ref}
-      onClick={() => onView(product)}
+      to={`/products/${product.id}`}
       className={cn(
-        'group bg-white rounded-xl border border-[#F5ECD5] overflow-hidden flex flex-col cursor-pointer',
-        'hover:shadow-xl hover:border-[#578E7E]/30 hover:-translate-y-1 transition-all duration-300',
+        'group bg-white rounded-xl border border-[#F5ECD5] overflow-hidden flex flex-col',
+        'hover:shadow-xl hover:border-[#578E7E]/35 hover:-translate-y-1 transition-all duration-300',
         inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'
       )}
       style={{ transitionDelay: `${delay}ms` }}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && onView(product)}
     >
       {/* Image */}
       <div className="relative h-44 overflow-hidden bg-[#F5ECD5]">
@@ -414,7 +70,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onView, delay }) => 
         {/* View overlay on hover */}
         <div className="absolute inset-0 bg-[#578E7E]/0 group-hover:bg-[#578E7E]/10 transition-colors duration-300 flex items-center justify-center">
           <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white text-[#578E7E] text-xs font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5">
-            <ZoomIn size={12} /> View Details
+            <ZoomIn size={12} /> View Product
           </span>
         </div>
       </div>
@@ -431,14 +87,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onView, delay }) => 
         {/* Footer */}
         <div className="mt-3 pt-3 border-t border-[#F5ECD5] flex items-center justify-between">
           <span className="text-xs text-[#578E7E] font-semibold flex items-center gap-1">
-            View Details <ArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
+            Specifications <ArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
           </span>
-          <span className="text-[10px] text-white bg-[#578E7E] px-2 py-0.5 rounded-full font-semibold">
+          <span className="text-[10px] text-white bg-[#578E7E] px-2.5 py-1 rounded-full font-semibold">
             Get Quote
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
@@ -447,12 +103,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onView, delay }) => 
    ════════════════════════════════════════════════════════ */
 const ProductsPage: React.FC = () => {
   const { products, loadingProducts } = useAdmin();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category') || 'All';
+
   const [search, setSearch] = useState('');
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeCategory, setActiveCategory] = useState(categoryParam);
   const [page, setPage] = useState(1);
-  const [detailProduct, setDetailProduct] = useState<Product | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
+
+  // Sync category param with activeCategory state
+  useEffect(() => {
+    setActiveCategory(categoryParam);
+    setPage(1);
+  }, [categoryParam]);
 
   const filtered = useMemo(() => products.filter(p => {
     const matchCat = activeCategory === 'All' || p.category === activeCategory;
@@ -471,11 +135,18 @@ const ProductsPage: React.FC = () => {
   );
 
   const handleCategoryChange = useCallback((cat: string) => {
-    setActiveCategory(cat); setPage(1);
-  }, []);
+    if (cat === 'All') {
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', cat);
+    }
+    setSearchParams(searchParams);
+    setPage(1);
+  }, [searchParams, setSearchParams]);
 
   const handleSearch = useCallback((val: string) => {
-    setSearch(val); setPage(1);
+    setSearch(val);
+    setPage(1);
   }, []);
 
   const handlePageChange = (p: number) => {
@@ -495,12 +166,12 @@ const ProductsPage: React.FC = () => {
           </Link>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <p className="text-[#a8d5c8] text-xs font-semibold uppercase tracking-[0.15em] mb-2">ProSource Enterprise</p>
+              <p className="text-[#a8d5c8] text-xs font-semibold uppercase tracking-[0.15em] mb-2">APR Services Enterprise</p>
               <h1 className="text-3xl sm:text-4xl font-bold text-white font-serif mb-2">
                 Product Catalogue
               </h1>
               <p className="text-white/60 text-sm max-w-lg">
-                Browse our complete procurement range. Click any product to see full details and request a personalised quote.
+                Browse our complete aviation and industrial consumables range. Select any product to view full technical specifications and request quotes.
               </p>
             </div>
             {!loadingProducts && (
@@ -570,7 +241,7 @@ const ProductsPage: React.FC = () => {
                 </>
               )}
             </p>
-            <p className="text-xs text-[#8a8a8a] hidden sm:block">Click any card to view details</p>
+            <p className="text-xs text-[#8a8a8a] hidden sm:block">Select any card to view details</p>
           </div>
 
           {/* Loading */}
@@ -600,7 +271,6 @@ const ProductsPage: React.FC = () => {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  onView={setDetailProduct}
                   delay={i * 40}
                 />
               ))}
@@ -653,14 +323,6 @@ const ProductsPage: React.FC = () => {
       </div>
 
       <Footer />
-
-      {/* Product Detail Drawer */}
-      {detailProduct && (
-        <DetailDrawer
-          product={detailProduct}
-          onClose={() => setDetailProduct(null)}
-        />
-      )}
     </>
   );
 };

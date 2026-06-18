@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, ShieldCheck, Award, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, ShieldCheck, Award, Layers } from 'lucide-react';
 import Button from '../ui/Button';
 
 const trustBadges = [
-  { icon: ShieldCheck, text: 'ISO 9001:2015 Certified' },
-  { icon: Award, text: 'MSME Registered' },
-  { icon: Users, text: '200+ Enterprise Clients' },
+  { icon: ShieldCheck, text: 'ISO 9001:2015 Quality Assured' },
+  { icon: Award, text: 'MSME Registered Partner' },
 ];
 
-const clientNames = ['Tata Group', 'Infosys', 'Wipro', 'L&T', 'Mahindra', 'HCL', 'Reliance'];
+const coreCapabilities = [
+  { name: 'Adhesives & Sealants', desc: 'Structural epoxy, RTV & film adhesives' },
+  { name: 'Lubricants & Oils', desc: 'Aviation turbine oils & hydraulic fluids' },
+  { name: 'Coatings & Paints', desc: 'Anti-corrosive aerospace primers' },
+  { name: 'Cleaners & Chemicals', desc: 'NDT penetrants & industrial washing compounds' },
+];
 
 const Hero: React.FC = () => {
   const [visible, setVisible] = useState(false);
@@ -17,13 +22,6 @@ const Hero: React.FC = () => {
     const timer = setTimeout(() => setVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
-
-  const scrollToContact = () => {
-    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-  };
-  const scrollToAbout = () => {
-    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   return (
     <section
@@ -49,11 +47,11 @@ const Hero: React.FC = () => {
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <pattern id="hero-grid" width="40" height="40" patternUnits="userSpaceOnUse">
               <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3D3D3D" strokeWidth="1" />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
+          <rect width="100%" height="100%" fill="url(#hero-grid)" />
         </svg>
       </div>
 
@@ -67,7 +65,7 @@ const Hero: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#578E7E]/10 border border-[#578E7E]/20 rounded-sm mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-[#578E7E] animate-pulse" />
               <span className="text-xs font-semibold text-[#578E7E] tracking-widest uppercase">
-                Enterprise Procurement Partner
+                B2B Sourcing & Supply
               </span>
             </div>
 
@@ -76,9 +74,9 @@ const Hero: React.FC = () => {
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#3D3D3D] leading-[1.1] mb-6"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
-              Procurement at Scale,{' '}
+              Industrial Sourcing,{' '}
               <span className="text-[#578E7E] relative">
-                Delivered with Precision
+                Delivered in Bulk.
                 <svg
                   className="absolute -bottom-2 left-0 w-full"
                   height="6"
@@ -99,100 +97,86 @@ const Hero: React.FC = () => {
             </h1>
 
             {/* Subtext */}
-            <p className="text-lg text-[#5a5a5a] leading-relaxed mb-8 max-w-xl">
-              We partner with large enterprises and MNCs to streamline sourcing, manage vendors, 
-              and deliver bulk procurement solutions — reliably, on time, and at competitive pricing.
+            <p className="text-base sm:text-lg text-[#5a5a5a] leading-relaxed mb-8 max-w-xl">
+              High-performance adhesives, lubricants, sealants, coatings, and tapes for aviation and industrial applications. Sourced directly with full certification.
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={scrollToContact}
-                className="group"
-              >
-                Request a Quote
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={scrollToAbout}
-              >
-                Learn More
-              </Button>
+              <Link to="/products">
+                <Button variant="primary" size="lg" className="group w-full sm:w-auto justify-center">
+                  Browse Catalogue
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Link to="/contact">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto justify-center">
+                  Request Quote
+                </Button>
+              </Link>
             </div>
 
             {/* Trust Badges */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-6 border-t border-[#F5ECD5] pt-6">
               {trustBadges.map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-center gap-2 text-sm text-[#5a5a5a]">
-                  <Icon size={15} className="text-[#578E7E]" />
-                  <span>{text}</span>
+                <div key={text} className="flex items-center gap-2.5 text-sm text-[#5a5a5a]">
+                  <Icon size={16} className="text-[#578E7E]" />
+                  <span className="font-semibold text-xs uppercase tracking-wider">{text}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right Content — Stats & Visual Card */}
+          {/* Right Content — Product Category Highlights Grid */}
           <div
             className={`transition-all duration-700 delay-200 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
           >
             <div className="relative">
               {/* Main card */}
-              <div className="bg-white rounded-sm shadow-xl border border-[#F5ECD5] p-8 relative z-10">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-2 h-2 rounded-full bg-green-400" />
-                  <span className="text-xs text-[#8a8a8a] font-medium">Live Operations Dashboard</span>
+              <div className="bg-white rounded-sm shadow-xl border border-[#F5ECD5] p-6 md:p-8 relative z-10">
+                <div className="flex items-center gap-2 mb-6 border-b border-[#F5ECD5] pb-4">
+                  <Layers size={18} className="text-[#578E7E]" />
+                  <span className="text-sm font-bold text-[#3D3D3D]">Core Sourcing Categories</span>
                 </div>
 
-                {/* Stats grid */}
-                <div className="grid grid-cols-2 gap-6 mb-8">
-                  {[
-                    { value: '12+', label: 'Years of Experience', desc: 'In enterprise procurement' },
-                    { value: '200+', label: 'Enterprise Clients', desc: 'MNCs & large corporates' },
-                    { value: '₹500Cr+', label: 'Procurement Handled', desc: 'Annual transaction volume' },
-                    { value: '98.5%', label: 'On-Time Delivery', desc: 'Across all categories' },
-                  ].map(stat => (
-                    <div key={stat.label} className="group">
-                      <div
-                        className="text-3xl font-bold text-[#578E7E] mb-1"
-                        style={{ fontFamily: "'Playfair Display', serif" }}
-                      >
-                        {stat.value}
+                {/* Sourcing capabilities grid */}
+                <div className="grid gap-4">
+                  {coreCapabilities.map((cap, idx) => (
+                    <Link
+                      key={cap.name}
+                      to={`/products?category=${encodeURIComponent(
+                        cap.name === 'Lubricants & Oils' ? 'Lubricants, Oils, & Greases' :
+                        cap.name === 'Cleaners & Chemicals' ? 'Cleaners & NDT Chemicals' : cap.name
+                      )}`}
+                      className="group flex items-center justify-between p-3.5 rounded-sm border border-[#F5ECD5]/60 bg-[#FFFAEC]/10 hover:bg-[#FFFAEC]/40 hover:border-[#578E7E]/30 transition-all duration-200"
+                    >
+                      <div>
+                        <div className="text-sm font-bold text-[#3D3D3D] group-hover:text-[#578E7E] transition-colors">
+                          {cap.name}
+                        </div>
+                        <div className="text-xs text-[#8a8a8a] mt-0.5">{cap.desc}</div>
                       </div>
-                      <div className="text-sm font-semibold text-[#3D3D3D] mb-0.5">{stat.label}</div>
-                      <div className="text-xs text-[#8a8a8a]">{stat.desc}</div>
-                    </div>
+                      <div className="w-7 h-7 rounded-full bg-[#F5ECD5] flex items-center justify-center text-[#578E7E] group-hover:bg-[#578E7E] group-hover:text-white transition-all duration-200">
+                        <ArrowRight size={12} />
+                      </div>
+                    </Link>
                   ))}
                 </div>
 
-                {/* Client logos bar */}
-                <div className="border-t border-[#F5ECD5] pt-5">
-                  <p className="text-xs text-[#8a8a8a] uppercase tracking-wider mb-3">Trusted by leading enterprises</p>
-                  <div className="flex flex-wrap gap-2">
-                    {clientNames.map(name => (
-                      <span
-                        key={name}
-                        className="px-3 py-1.5 bg-[#F5ECD5] text-[#5a5a5a] text-xs font-medium rounded-sm"
-                      >
-                        {name}
-                      </span>
-                    ))}
-                  </div>
+                {/* Bottom link */}
+                <div className="mt-6 text-center">
+                  <Link
+                    to="/products"
+                    className="text-xs font-bold text-[#578E7E] hover:text-[#3a6b5e] transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    View All Sourcing Categories <ArrowRight size={12} />
+                  </Link>
                 </div>
               </div>
 
-              {/* Decorative elements */}
+              {/* Decorative borders */}
               <div className="absolute -top-4 -right-4 w-24 h-24 border-2 border-teal-900/20 rounded-sm z-0" />
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-[#ded3b6] rounded-sm z-0" />
-
-              {/* Floating badge */}
-              {/* <div className="absolute -translate-y-1/2 bg-[#578E7E] text-[#FFFAEC] px-3 py-2 rounded-sm shadow-lg z-20 hidden md:block">
-                <div className="text-xs font-bold">PAN India</div>
-                <div className="text-[0.6rem] opacity-80">Coverage</div>
-              </div> */}
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-[#ded3b6]/50 rounded-sm z-0" />
             </div>
           </div>
         </div>
@@ -208,3 +192,4 @@ const Hero: React.FC = () => {
 };
 
 export default Hero;
+

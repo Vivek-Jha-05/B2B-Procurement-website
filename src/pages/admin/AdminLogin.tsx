@@ -40,7 +40,7 @@ const AdminLogin: React.FC = () => {
               <span className="text-[#FFFAEC] font-bold text-sm">PS</span>
             </div>
             <div className="text-left">
-              <div className="font-bold text-[#3D3D3D] text-lg">ProSource</div>
+              <div className="font-bold text-[#3D3D3D] text-lg">APR Services</div>
               <div className="text-xs text-[#578E7E] tracking-widest uppercase">Enterprise</div>
             </div>
           </div>
@@ -64,7 +64,7 @@ const AdminLogin: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="admin@prosource.com"
+                  placeholder="admin@APR Services.com"
                   required
                   className="w-full pl-9 pr-4 py-2.5 text-sm border border-[#e0d8c8] rounded-sm focus:border-[#578E7E] focus:ring-2 focus:ring-[#578E7E]/20 outline-none transition-all"
                 />
