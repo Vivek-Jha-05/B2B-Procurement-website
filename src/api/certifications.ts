@@ -15,7 +15,7 @@ function toCert(c: ApiCertification): Certification {
 }
 
 export async function fetchCertifications(): Promise<Certification[]> {
-  const data = await apiRequest<ApiCertification[]>('/api/certifications');
+  const data = await apiRequest<ApiCertification[]>('/api/certifications', { skipAuth: true });
   return data.map(toCert);
 }
 

@@ -15,6 +15,14 @@ export interface Certification {
   year?: string;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  order: number;
+}
+
 export interface ContactLead {
   id: string;
   name: string;
@@ -39,4 +47,15 @@ export interface ContactFormData {
   phone: string;
   message: string;
   honeypot?: string;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  logoUrl: string;
+  cloudinaryPublicId?: string;
+  order: number;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }

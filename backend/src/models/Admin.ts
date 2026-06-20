@@ -5,6 +5,7 @@ export interface IAdmin extends Document {
   email: string;
   passwordHash: string;
   role: 'admin' | 'super_admin';
+  refreshTokens?: string[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword(plain: string): Promise<boolean>;
@@ -27,6 +28,10 @@ const AdminSchema = new Schema<IAdmin>(
       type: String,
       enum: ['admin', 'super_admin'],
       default: 'admin',
+    },
+    refreshTokens: {
+      type: [String],
+      default: [],
     },
   },
   {

@@ -8,8 +8,8 @@ import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { useAdmin } from '../context/AdminContext';
 import type { Product } from '../types';
-import { productCategories } from '../data/mockData';
 import { cn } from '../utils/cn';
+import { useDebounce } from '../hooks/useDebounce';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -102,7 +102,12 @@ const ProductCard: React.FC<{ product: Product; delay: number }> = ({ product, d
    MAIN PAGE
    ════════════════════════════════════════════════════════ */
 const ProductsPage: React.FC = () => {
-  const { products, loadingProducts } = useAdmin();
+  const { products, loadingProducts, categories_list } = useAdmin();
+
+  const dynamicCategories = useMemo(
+    () => ['All', ...categories_list.map(c => c.name)],
+    [categories_list]
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category') || 'All';
 
@@ -118,15 +123,17 @@ const ProductsPage: React.FC = () => {
     setPage(1);
   }, [categoryParam]);
 
+  const debouncedSearch = useDebounce(search, 300);
+
   const filtered = useMemo(() => products.filter(p => {
     const matchCat = activeCategory === 'All' || p.category === activeCategory;
-    const q = search.toLowerCase();
-    const matchSearch = !search ||
+    const q = debouncedSearch.toLowerCase();
+    const matchSearch = !debouncedSearch ||
       p.name.toLowerCase().includes(q) ||
       p.description.toLowerCase().includes(q) ||
       p.category.toLowerCase().includes(q);
     return matchCat && matchSearch;
-  }), [products, search, activeCategory]);
+  }), [products, debouncedSearch, activeCategory]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const paginated = useMemo(
@@ -214,7 +221,7 @@ const ProductsPage: React.FC = () => {
 
           {/* Category pills */}
           <div className={cn('flex flex-wrap gap-2 mb-6', !showFilters && 'hidden sm:flex')}>
-            {productCategories.map(cat => (
+            {dynamicCategories.map(cat => (
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}

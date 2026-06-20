@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import mongoose from 'mongoose';
-import Product from '../models/Product';
+import Client from '../models/Client';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { uploadSingle, uploadBufferToCloudinary } from '../middleware/upload';
@@ -9,88 +9,101 @@ import cloudinary from '../config/cloudinary';
 
 const router = Router();
 
-const productSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(200, 'Name too long').trim(),
-  category: z.string().min(1, 'Category is required').trim(),
-  description: z
-    .string()
-    .min(1, 'Description is required')
-    .max(2000, 'Description too long')
-    .trim(),
-  imageUrl: z.string().url('Invalid image URL').optional().or(z.literal('')),
+const clientSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name too long').trim(),
+  logoUrl: z.string().url('Invalid image URL').optional().or(z.literal('')),
+  order: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
 });
 
-const updateProductSchema = productSchema.partial();
+const updateClientSchema = clientSchema.partial();
 
-// GET /api/products — Public
+// GET /api/clients — Public (Gets active clients for homepage showcase)
 router.get(
   '/',
   async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const products = await Product.find({ isActive: true })
-        .select('name category description imageUrl createdAt')
-        .sort({ createdAt: -1 })
+      const clients = await Client.find({ isActive: true })
+        .select('name logoUrl order isActive createdAt')
+        .sort({ order: 1, name: 1 })
         .lean();
 
       // Cache for 60s, stale-while-revalidate for 5min
       res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
-      res.json(products);
+      res.json(clients);
     } catch (err) {
       next(err);
     }
   }
 );
 
-// POST /api/products — Admin only
+// GET /api/clients/all — Admin only (Gets all clients including inactive ones)
+router.get(
+  '/all',
+  requireAuth,
+  requireRole(['admin', 'super_admin']),
+  async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const clients = await Client.find()
+        .sort({ order: 1, name: 1 })
+        .lean();
+      res.json(clients);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /api/clients — Admin only
 router.post(
   '/',
   requireAuth,
   requireRole(['admin', 'super_admin']),
-  validate(productSchema),
+  validate(clientSchema),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const product = await Product.create(req.body);
-      res.status(201).json(product);
+      const client = await Client.create(req.body);
+      res.status(201).json(client);
     } catch (err) {
       next(err);
     }
   }
 );
 
-// PUT /api/products/:id — Admin only
+// PUT /api/clients/:id — Admin only
 router.put(
   '/:id',
   requireAuth,
   requireRole(['admin', 'super_admin']),
-  validate(updateProductSchema),
+  validate(updateClientSchema),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
-        res.status(400).json({ error: 'Invalid product ID' });
+        res.status(400).json({ error: 'Invalid client ID' });
         return;
       }
 
-      const product = await Product.findByIdAndUpdate(
+      const client = await Client.findByIdAndUpdate(
         id,
         { $set: req.body },
         { new: true, runValidators: true }
       );
 
-      if (!product) {
-        res.status(404).json({ error: 'Product not found' });
+      if (!client) {
+        res.status(404).json({ error: 'Client not found' });
         return;
       }
 
-      res.json(product);
+      res.json(client);
     } catch (err) {
       next(err);
     }
   }
 );
 
-// DELETE /api/products/:id — Admin only
+// DELETE /api/clients/:id — Admin only
 router.delete(
   '/:id',
   requireAuth,
@@ -100,27 +113,27 @@ router.delete(
       const { id } = req.params;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
-        res.status(400).json({ error: 'Invalid product ID' });
+        res.status(400).json({ error: 'Invalid client ID' });
         return;
       }
 
-      const product = await Product.findById(id);
+      const client = await Client.findById(id);
 
-      if (!product) {
-        res.status(404).json({ error: 'Product not found' });
+      if (!client) {
+        res.status(404).json({ error: 'Client not found' });
         return;
       }
 
       // Delete from Cloudinary if exists
-      if (product.cloudinaryPublicId) {
+      if (client.cloudinaryPublicId) {
         try {
-          await cloudinary.uploader.destroy(product.cloudinaryPublicId);
+          await cloudinary.uploader.destroy(client.cloudinaryPublicId);
         } catch (cloudinaryErr) {
           console.error('Cloudinary deletion failed:', cloudinaryErr);
         }
       }
 
-      await product.deleteOne();
+      await client.deleteOne();
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -128,9 +141,9 @@ router.delete(
   }
 );
 
-// POST /api/products/:id/image — Admin only
+// POST /api/clients/:id/logo — Admin only (image upload)
 router.post(
-  '/:id/image',
+  '/:id/logo',
   requireAuth,
   requireRole(['admin', 'super_admin']),
   (req: Request, res: Response, next: NextFunction): void => {
@@ -144,7 +157,7 @@ router.post(
       const { id } = req.params;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
-        res.status(400).json({ error: 'Invalid product ID' });
+        res.status(400).json({ error: 'Invalid client ID' });
         return;
       }
 
@@ -153,32 +166,32 @@ router.post(
         return;
       }
 
-      // Upload buffer to Cloudinary using upload_stream (v2 compatible)
-      const cloudinaryResult = await uploadBufferToCloudinary(req.file.buffer);
+      // Upload buffer to Cloudinary
+      const cloudinaryResult = await uploadBufferToCloudinary(req.file.buffer, 'prosource/clients');
 
       // Delete old image from Cloudinary if it exists
-      const existing = await Product.findById(id);
+      const existing = await Client.findById(id);
       if (existing?.cloudinaryPublicId) {
         await cloudinary.uploader.destroy(existing.cloudinaryPublicId).catch(console.error);
       }
 
-      const product = await Product.findByIdAndUpdate(
+      const client = await Client.findByIdAndUpdate(
         id,
         {
           $set: {
-            imageUrl: cloudinaryResult.secure_url,
+            logoUrl: cloudinaryResult.secure_url,
             cloudinaryPublicId: cloudinaryResult.public_id,
           },
         },
         { new: true }
       );
 
-      if (!product) {
-        res.status(404).json({ error: 'Product not found' });
+      if (!client) {
+        res.status(404).json({ error: 'Client not found' });
         return;
       }
 
-      res.json(product);
+      res.json(client);
     } catch (err) {
       next(err);
     }

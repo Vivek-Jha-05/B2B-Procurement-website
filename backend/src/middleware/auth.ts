@@ -51,3 +51,19 @@ export const requireAuth = (
     }
   }
 };
+
+export const requireRole = (allowedRoles: ('admin' | 'super_admin')[]) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({ error: 'Authentication required' });
+      return;
+    }
+
+    if (!allowedRoles.includes(req.user.role as any)) {
+      res.status(403).json({ error: 'Access forbidden: insufficient permissions' });
+      return;
+    }
+
+    next();
+  };
+};

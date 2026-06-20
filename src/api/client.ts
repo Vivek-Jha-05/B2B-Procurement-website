@@ -13,19 +13,31 @@ export function clearToken() {
   tokenExpiry = null;
 }
 
+let refreshPromise: Promise<string | null> | null = null;
+
 async function refreshAccessToken(): Promise<string | null> {
-  try {
-    const res = await fetch(`${API_BASE}/api/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    setToken(data.token, data.expiresIn);
-    return data.token;
-  } catch {
-    return null;
+  if (refreshPromise) {
+    return refreshPromise;
   }
+
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      setToken(data.token, data.expiresIn);
+      return data.token;
+    } catch {
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 export async function getValidToken(): Promise<string | null> {
@@ -38,17 +50,18 @@ export async function getValidToken(): Promise<string | null> {
 
 export async function apiRequest<T>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit & { skipAuth?: boolean } = {}
 ): Promise<T> {
-  const token = await getValidToken();
+  const { skipAuth, ...fetchOptions } = options;
+  const token = skipAuth ? null : await getValidToken();
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
+    ...fetchOptions.headers,
   };
 
   const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
+    ...fetchOptions,
     headers,
     credentials: 'include',
   });

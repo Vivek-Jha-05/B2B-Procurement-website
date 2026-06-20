@@ -22,7 +22,7 @@ function toProduct(p: ApiProduct): Product {
 }
 
 export async function fetchProducts(): Promise<Product[]> {
-  const data = await apiRequest<ApiProduct[]>('/api/products');
+  const data = await apiRequest<ApiProduct[]>('/api/products', { skipAuth: true });
   return data.map(toProduct);
 }
 

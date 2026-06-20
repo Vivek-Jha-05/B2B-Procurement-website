@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Package, Mail, Award, LogOut,
-  Menu, X, ChevronRight
+  Menu, X, ChevronRight, Layers, Handshake
 } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { cn } from '../../utils/cn';
@@ -10,6 +10,8 @@ import { cn } from '../../utils/cn';
 const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { label: 'Products', href: '/admin/products', icon: Package },
+  { label: 'Categories', href: '/admin/categories', icon: Layers },
+  { label: 'Clients', href: '/admin/clients', icon: Handshake },
   { label: 'Leads & Enquiries', href: '/admin/leads', icon: Mail },
   { label: 'Certifications', href: '/admin/certifications', icon: Award },
 ];

@@ -12,6 +12,7 @@ import CompactWhyUs from './components/sections/CompactWhyUs';
 import CTABanner from './components/sections/CTABanner';
 import ScrollToTop from './components/ScrollToTop';
 import FloatingActions from './components/FloatingActions';
+import ClientShowcase from './components/sections/ClientShowcase';
 
 // Lazy load pages not needed on initial load
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
@@ -19,6 +20,8 @@ const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'));
 const AdminLeads = lazy(() => import('./pages/admin/AdminLeads'));
 const AdminCertifications = lazy(() => import('./pages/admin/AdminCertifications'));
+const AdminCategories = lazy(() => import('./pages/admin/AdminCategories'));
+const AdminClients = lazy(() => import('./pages/admin/AdminClients'));
 const ProductsPage = lazy(() => import('./pages/ProductsPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
@@ -37,6 +40,7 @@ function HomePage() {
       <Navbar />
       <main className="flex-grow">
         <Hero />
+        <ClientShowcase />
         <ProductShowcase />
         <FeaturedProducts />
         <CompactWhyUs />
@@ -78,6 +82,22 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <AdminProducts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/categories"
+              element={
+                <ProtectedRoute>
+                  <AdminCategories />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/clients"
+              element={
+                <ProtectedRoute>
+                  <AdminClients />
                 </ProtectedRoute>
               }
             />

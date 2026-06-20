@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import mongoose from 'mongoose';
 import Lead from '../models/Lead';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, requireRole } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 
 const router = Router();
@@ -13,8 +13,9 @@ const statusSchema = z.object({
   }),
 });
 
-// All routes require authentication
+// All routes require authentication and admin role
 router.use(requireAuth);
+router.use(requireRole(['admin', 'super_admin']));
 
 // GET /api/leads — Paginated list
 router.get(

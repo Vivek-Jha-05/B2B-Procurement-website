@@ -20,6 +20,7 @@ export async function submitContactForm(
   return apiRequest('/api/contact', {
     method: 'POST',
     body: JSON.stringify(data),
+    skipAuth: true,
   });
 }
 
@@ -29,5 +30,6 @@ export async function submitQuoteRequest(
   return apiRequest('/api/contact', {
     method: 'POST',
     body: JSON.stringify(data),
+    skipAuth: true,
   });
 }

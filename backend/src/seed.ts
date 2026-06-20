@@ -4,6 +4,8 @@ import connectDB from './config/db';
 import Admin from './models/Admin';
 import Product from './models/Product';
 import Certification from './models/Certification';
+import Category from './models/Category';
+import Client from './models/Client';
 
 // ──────────────────────────────────────────────
 // Seed Data
@@ -11,75 +13,115 @@ import Certification from './models/Certification';
 
 const products = [
   {
-    name: 'Industrial Safety Gloves',
-    category: 'Personal Protective Equipment',
-    description:
-      'Heavy-duty cut-resistant gloves engineered for industrial environments. Made from high-performance HPPE fiber with polyurethane coating. ANSI/ISEA 105-2016 Level A6 cut resistance. Ideal for metal fabrication, glass handling, and automotive assembly.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1627163439134-7a8c47e08208?w=800&h=600&fit=crop',
+    name: 'Loctite EA 9497 Epoxy Adhesive',
+    category: 'Adhesives',
+    description: 'High temperature resistant, two-part epoxy adhesive designed for aerospace component bonding. Offers excellent thermal conductivity, high compressive strength, and electrical insulation properties.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764574/prosource/products/h4yqdmanjyy9twbqbhat.jpg',
+    cloudinaryPublicId: 'prosource/products/h4yqdmanjyy9twbqbhat',
     isActive: true,
   },
   {
-    name: 'N95 Respirator Masks (50-Pack)',
-    category: 'Personal Protective Equipment',
-    description:
-      'NIOSH-approved N95 filtering facepiece respirators offering ≥95% filtration efficiency against non-oil-based particles. Adjustable nose clip for secure seal. Cup shape for comfortable wear during extended shifts. Compliant with OSHA 29 CFR 1910.134.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1584634731339-252c581abfc5?w=800&h=600&fit=crop',
+    name: 'RTV 157 Silicone Rubber Adhesive Sealant',
+    category: 'Sealants',
+    description: 'High-strength, high-temperature silicone sealant for aerospace sealing and gasketing. Excellent resistance to weathering, ozone, and aviation chemicals with a wide operational temperature range.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764576/prosource/products/i92emqhmq2in1vbbsrce.jpg',
+    cloudinaryPublicId: 'prosource/products/i92emqhmq2in1vbbsrce',
     isActive: true,
   },
   {
-    name: 'Stainless Steel Fastener Kit',
-    category: 'Industrial Fasteners',
-    description:
-      'Comprehensive 1,200-piece Grade 316 stainless steel fastener assortment. Includes hex bolts (M4–M16), nuts, washers, and self-tapping screws. Superior corrosion resistance for marine and outdoor applications. Supplied in a labelled storage case.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
+    name: 'CHO-BOND 1030 Conductive Silicone',
+    category: 'Sealants',
+    description: 'Electrically conductive silicone gasket adhesive for EMI shielding. Highly resistant to aviation fluids, ensuring environmental sealing and conductive bonding.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764577/prosource/products/ho6o1thqomnkluqpbcsi.jpg',
+    cloudinaryPublicId: 'prosource/products/ho6o1thqomnkluqpbcsi',
     isActive: true,
   },
   {
-    name: 'High-Visibility Safety Vest',
-    category: 'Personal Protective Equipment',
-    description:
-      'ANSI/ISEA 107-2015 Class 2 high-visibility safety vest with retroreflective striping. 100% polyester mesh for breathability. Zipper front closure. Available in fluorescent yellow-green and orange. Meets DOT and OSHA requirements for road and construction work.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1609803384069-19f3f7d5b874?w=800&h=600&fit=crop',
+    name: '3M AF 163-2K Structural Film Adhesive',
+    category: 'Adhesives',
+    description: 'Structural adhesive film for aircraft composites and metal-to-metal bonding. Exceptional toughness, high peel strength, and resistance to environmental degradation.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764579/prosource/products/srljhrpkdrzz79nui3gw.jpg',
+    cloudinaryPublicId: 'prosource/products/srljhrpkdrzz79nui3gw',
     isActive: true,
   },
   {
-    name: 'Digital Torque Wrench Set',
-    category: 'Tools & Equipment',
-    description:
-      'Professional digital torque wrench set with ±2% accuracy. Range: 5–100 Nm. Backlit LCD display with peak-hold and track modes. Audible and visual alerts at target torque. Includes 3/8" and 1/2" drive adapters. Calibration certificate included.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&h=600&fit=crop',
+    name: 'Deft Polyurethane Camouflage Coating',
+    category: 'Coatings',
+    description: 'Durable military-grade polyurethane topcoat for aerospace exterior surfaces. Highly resistant to UV radiation, chemical exposure, and mechanical wear.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764581/prosource/products/n6qk84mq7s1sjan7uemc.jpg',
+    cloudinaryPublicId: 'prosource/products/n6qk84mq7s1sjan7uemc',
     isActive: true,
   },
   {
-    name: 'Industrial Cleaning Supplies Bundle',
-    category: 'Maintenance & Janitorial',
-    description:
-      'Complete industrial cleaning bundle for heavy-duty facility maintenance. Includes concentrated floor cleaner (5L), degreaser spray (2L), microfibre mop set, and safety data sheets. Formulated for manufacturing plants, warehouses, and food-processing facilities. Eco-friendly and REACH-compliant.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800&h=600&fit=crop',
+    name: 'AeroShell Oil 80 Piston Engine Oil',
+    category: 'Oils',
+    description: 'Straight mineral oil for aviation piston engines. Recommended for break-in periods and light aircraft engines operating under normal conditions.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764583/prosource/products/ak9jgtsujfa8nkvgrtbr.jpg',
+    cloudinaryPublicId: 'prosource/products/ak9jgtsujfa8nkvgrtbr',
     isActive: true,
   },
   {
-    name: 'Arc Flash Protection Suit',
-    category: 'Personal Protective Equipment',
-    description:
-      'Premium arc flash protection suit rated at 40 cal/cm² HRC 4. Includes hood with face shield, coat, bib overall, and gloves. FR cotton/nylon blend. NFPA 70E and IEC 61482-1-1 compliant. Designed for electrical maintenance, switchgear servicing, and utility work.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=600&fit=crop',
+    name: 'Mobil HyJet IV-A+ Aviation Hydraulic Fluid',
+    category: 'Oils',
+    description: 'Fire-resistant phosphate ester hydraulic fluid designed for commercial passenger aircraft systems. Excellent low-temperature viscosity and thermal stability.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764584/prosource/products/gezbzfvqoznqlxutmyyj.jpg',
+    cloudinaryPublicId: 'prosource/products/gezbzfvqoznqlxutmyyj',
     isActive: true,
   },
   {
-    name: 'Barcode Label Printer (Industrial)',
-    category: 'Office & Warehouse Equipment',
-    description:
-      'Industrial-grade direct thermal and thermal transfer label printer. Print speed up to 200mm/s. Resolution 203 dpi. Supports ZPL, EPL, and TSPL-EZ languages. USB, RS-232, and Ethernet connectivity. Compatible with all standard label widths 25–118mm. Ideal for warehouse management and asset tracking.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=800&h=600&fit=crop',
+    name: 'Royco 782 Synthetic Hydraulic Fluid',
+    category: 'Oils',
+    description: 'Fire-resistant synthetic hydrocarbon hydraulic fluid formulated for military aircraft, missiles, and ordinance systems. Operates over a very wide temperature range.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764586/prosource/products/mg6gxz81ajjfdwsqrxid.jpg',
+    cloudinaryPublicId: 'prosource/products/mg6gxz81ajjfdwsqrxid',
+    isActive: true,
+  },
+  {
+    name: 'Royco 481 Jet Engine Lubricating Oil',
+    category: 'Oils',
+    description: 'Synthetic turbine engine lubricating oil for aircraft jet engines. Provides clean operation, high thermal stability, and low volatility.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764588/prosource/products/b5uzogonjczzyyruzzx4.jpg',
+    cloudinaryPublicId: 'prosource/products/b5uzogonjczzyyruzzx4',
+    isActive: true,
+  },
+  {
+    name: 'Aeroquip Medium Pressure Hose',
+    category: 'Mechanical Items',
+    description: 'Flexible synthetic rubber hose with single wire braid reinforcement. Designed for aircraft fuel, oil, coolant, and water lines with operational reliability.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764589/prosource/products/twuxbnbjmuhem04nbcjg.jpg',
+    cloudinaryPublicId: 'prosource/products/twuxbnbjmuhem04nbcjg',
+    isActive: true,
+  },
+  {
+    name: 'Callington Aero Wash Aircraft Cleaner',
+    category: 'Cleaners',
+    description: 'High-performance aircraft washing compound. Neutral pH formulation that is safe on paint, polycarbonates, acrylics, and structural composites.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764591/prosource/products/tyrun0xvladu73cuo9ac.jpg',
+    cloudinaryPublicId: 'prosource/products/tyrun0xvladu73cuo9ac',
+    isActive: true,
+  },
+  {
+    name: 'Ardrox 970P25 Fluorescent Penetrant',
+    category: 'NDT Chemicals',
+    description: 'Water-washable fluorescent penetrant (Level 2) for non-destructive testing of critical aerospace engine components, castings, and forgings.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764592/prosource/products/gtadrgpfmpdpn6zpfhqr.jpg',
+    cloudinaryPublicId: 'prosource/products/gtadrgpfmpdpn6zpfhqr',
+    isActive: true,
+  },
+  {
+    name: '3M Polyurethane Protective Tape 8673',
+    category: 'Tapes',
+    description: 'Highly durable, weather-resistant polyurethane tape with acrylic adhesive. Protects aircraft leading edges, radomes, and surfaces from erosion and debris.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764594/prosource/products/klghg8baluvjry6hv7r7.jpg',
+    cloudinaryPublicId: 'prosource/products/klghg8baluvjry6hv7r7',
+    isActive: true,
+  },
+  {
+    name: '3M Adhesive Transfer Tape 465',
+    category: 'Tapes',
+    description: 'High-tack acrylic adhesive transfer tape for quick bonding, splicing, and mounting in aviation warehouse and maintenance environments.',
+    imageUrl: 'https://res.cloudinary.com/dbw4bmkoo/image/upload/v1781764595/prosource/products/lti5puvei7bxa1gn6kwr.jpg',
+    cloudinaryPublicId: 'prosource/products/lti5puvei7bxa1gn6kwr',
     isActive: true,
   },
 ];
@@ -116,6 +158,98 @@ const certifications = [
     issuer: 'Government e-Marketplace (GeM)',
     year: '2024',
     order: 4,
+  },
+];
+
+const categories = [
+  {
+    name: 'Adhesives',
+    description: 'High-performance structural epoxy, cyanoacrylate, and film adhesives for aerospace and industrial bonding applications.',
+    imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&h=600&fit=crop',
+    order: 1,
+  },
+  {
+    name: 'Coatings',
+    description: 'Corrosion-resistant primers, protective topcoats, and specialty aerospace coatings for metal and composite surfaces.',
+    imageUrl: 'https://images.unsplash.com/photo-1590233649088-e8898b5b4e31?w=800&h=600&fit=crop',
+    order: 2,
+  },
+  {
+    name: 'Mechanical Items',
+    description: 'Precision-engineered rivets, fasteners, fittings, and hardware for structural and mechanical assemblies.',
+    imageUrl: 'https://images.unsplash.com/photo-1537462715879-360eeb61a0bc?w=800&h=600&fit=crop',
+    order: 3,
+  },
+  {
+    name: 'Cleaners',
+    description: 'Industrial-grade degreasers, solvent cleaners, and washing compounds for surface preparation and maintenance.',
+    imageUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800&h=600&fit=crop',
+    order: 4,
+  },
+  {
+    name: 'Lubricants',
+    description: 'High-temperature lubricants, anti-seize compounds, and dry-film lubricants for moving mechanical parts.',
+    imageUrl: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=800&h=600&fit=crop',
+    order: 5,
+  },
+  {
+    name: 'Mechanical Consumables',
+    description: 'Abrasive discs, cutting wheels, sanding belts, and other disposable tooling for fabrication and finishing.',
+    imageUrl: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&h=600&fit=crop',
+    order: 6,
+  },
+  {
+    name: 'Tapes',
+    description: 'Erosion protection tapes, masking tapes, adhesive transfer tapes, and specialty sealing tapes for industry.',
+    imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop',
+    order: 7,
+  },
+  {
+    name: 'NDT Chemicals',
+    description: 'Fluorescent penetrants, developers, magnetic particle inks, and inspection chemicals for non-destructive testing.',
+    imageUrl: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&h=600&fit=crop',
+    order: 8,
+  },
+  {
+    name: 'Oils',
+    description: 'Aviation turbine engine oils, hydraulic fluids, and specialty industrial oils for lubrication and heat transfer.',
+    imageUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&h=600&fit=crop',
+    order: 9,
+  },
+  {
+    name: 'Paints',
+    description: 'Aerospace-grade primers, polyurethane topcoats, touch-up paints, and specialty finishes for industrial use.',
+    imageUrl: 'https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=800&h=600&fit=crop',
+    order: 10,
+  },
+  {
+    name: 'Greases',
+    description: 'Multi-purpose greases, bearing greases, and specialty aviation greases for extreme-temperature applications.',
+    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
+    order: 11,
+  },
+  {
+    name: 'Sealants',
+    description: 'Polysulfide fuel tank sealants, silicone RTV sealants, and gasket compounds for sealing and weatherproofing.',
+    imageUrl: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=600&fit=crop',
+    order: 12,
+  },
+];
+
+const clients = [
+  {
+    name: 'Adani',
+    logoUrl: '',
+    cloudinaryPublicId: '',
+    order: 1,
+    isActive: true,
+  },
+  {
+    name: 'Israel Aerospace',
+    logoUrl: '',
+    cloudinaryPublicId: '',
+    order: 2,
+    isActive: true,
   },
 ];
 
@@ -166,6 +300,28 @@ const seed = async (): Promise<void> => {
   } else {
     await Certification.insertMany(certifications);
     console.log(`✅ Seeded ${certifications.length} certifications`);
+  }
+
+  // ── Categories ─────────────────────────────
+  const existingCatCount = await Category.countDocuments();
+  if (existingCatCount > 0) {
+    console.log(
+      `⏭️  ${existingCatCount} categories already exist — skipping category seed`
+    );
+  } else {
+    await Category.insertMany(categories);
+    console.log(`✅ Seeded ${categories.length} categories`);
+  }
+
+  // ── Clients ────────────────────────────────
+  const existingClientCount = await Client.countDocuments();
+  if (existingClientCount > 0) {
+    console.log(
+      `⏭️  ${existingClientCount} clients already exist — skipping client seed`
+    );
+  } else {
+    await Client.insertMany(clients);
+    console.log(`✅ Seeded ${clients.length} clients`);
   }
 
   // ── Done ───────────────────────────────────

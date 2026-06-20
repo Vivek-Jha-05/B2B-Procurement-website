@@ -1,49 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight } from 'lucide-react';
-
-const categories = [
-  {
-    name: 'Adhesives & Sealants',
-    desc: 'High-performance epoxy, structural film adhesives, and silicone RTV sealants.',
-    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&h=600&fit=crop',
-    count: '6 Products',
-  },
-  {
-    name: 'Coatings & Paints',
-    desc: 'Corrosion-resistant primers and military-grade protective polyurethane topcoats.',
-    image: 'https://images.unsplash.com/photo-1590233649088-e8898b5b4e31?w=800&h=600&fit=crop',
-    count: '2 Products',
-  },
-  {
-    name: 'Lubricants, Oils, & Greases',
-    desc: 'AeroShell turbine engine oils and fire-resistant aviation hydraulic fluids.',
-    image: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=800&h=600&fit=crop',
-    count: '4 Products',
-  },
-  {
-    name: 'Mechanical Items & Consumables',
-    desc: 'CherryMAX structural blind rivets, flexible braided hoses, and hardware.',
-    image: 'https://images.unsplash.com/photo-1537462715879-360eeb61a0bc?w=800&h=600&fit=crop',
-    count: '2 Products',
-  },
-  {
-    name: 'Cleaners & NDT Chemicals',
-    desc: 'Neutral aircraft washing compounds and fluorescent penetrants for crack testing.',
-    image: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=800&h=600&fit=crop',
-    count: '2 Products',
-  },
-  {
-    name: 'Tapes',
-    desc: 'Aircraft radome erosion protection tapes and high-tack adhesive transfer tapes.',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop',
-    count: '2 Products',
-  },
-];
+import { useAdmin } from '../../context/AdminContext';
 
 const ProductShowcase: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
+  const { categories_list, products } = useAdmin();
+
+  // Compute product count per category
+  const categoryCards = useMemo(() => {
+    return categories_list.map(cat => {
+      const count = products.filter(p => p.category === cat.name).length;
+      return {
+        name: cat.name,
+        desc: cat.description,
+        image: cat.imageUrl,
+        count: `${count} Product${count !== 1 ? 's' : ''}`,
+      };
+    });
+  }, [categories_list, products]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -62,7 +38,7 @@ const ProductShowcase: React.FC = () => {
   }, []);
 
   return (
-    <section id="categories" ref={containerRef} className="section-pad bg-white overflow-hidden">
+    <section id="categories" ref={containerRef} className="pt-8 md:pt-12 pb-12 md:pb-16 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
@@ -93,15 +69,15 @@ const ProductShowcase: React.FC = () => {
         </div>
 
         {/* Category Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categories.map((cat, idx) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {categoryCards.map((cat, idx) => (
             <Link
               key={cat.name}
               to={`/products?category=${encodeURIComponent(cat.name)}`}
-              className={`group relative h-80 rounded-xl overflow-hidden shadow-sm border border-[#F5ECD5] flex flex-col justify-end p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 ${
+              className={`group relative h-72 rounded-xl overflow-hidden shadow-sm border border-[#F5ECD5] flex flex-col justify-end p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 ${
                 inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
-              style={{ transitionDelay: `${idx * 75}ms` }}
+              style={{ transitionDelay: `${idx * 60}ms` }}
             >
               {/* Image background with overlay */}
               <div className="absolute inset-0 z-0">
@@ -125,12 +101,12 @@ const ProductShowcase: React.FC = () => {
                   {cat.count}
                 </span>
                 <h3 
-                  className="text-lg font-bold mb-2 font-serif group-hover:text-[#a8d5c8] transition-colors"
+                  className="text-base font-bold mb-1.5 font-serif group-hover:text-[#a8d5c8] transition-colors"
                   style={{ fontFamily: 'Playfair Display, Georgia, serif' }}
                 >
                   {cat.name}
                 </h3>
-                <p className="text-xs text-white/75 leading-relaxed mb-4 font-normal line-clamp-2">
+                <p className="text-[10px] text-white/75 leading-relaxed mb-3 font-normal line-clamp-2">
                   {cat.desc}
                 </p>
                 <div className="flex items-center gap-1 text-xs font-semibold text-[#a8d5c8] group-hover:text-white transition-colors">
@@ -146,4 +122,3 @@ const ProductShowcase: React.FC = () => {
 };
 
 export default ProductShowcase;
-

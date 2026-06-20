@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
-import type { AdminUser, Product, Certification } from '../types';
+import type { AdminUser, Product, Certification, Category, Client } from '../types';
 import { loginApi, logoutApi } from '../api/auth';
 import {
   fetchProducts,
@@ -12,6 +12,19 @@ import {
   createCertification as createCertApi,
   deleteCertificationApi,
 } from '../api/certifications';
+import {
+  fetchCategories,
+  createCategory as createCategoryApi,
+  updateCategory as updateCategoryApi,
+  deleteCategory as deleteCategoryApi,
+} from '../api/categories';
+import {
+  fetchClients,
+  fetchClientsAll,
+  createClient as createClientApi,
+  updateClient as updateClientApi,
+  deleteClient as deleteClientApi,
+} from '../api/clients';
 
 interface AdminContextType {
   admin: AdminUser | null;
@@ -27,6 +40,16 @@ interface AdminContextType {
   refreshProducts: () => Promise<void>;
   addCertification: (cert: Omit<Certification, 'id'>) => Promise<void>;
   deleteCertification: (id: string) => Promise<void>;
+  categories_list: Category[];
+  addCategory: (category: Omit<Category, 'id'>) => Promise<Category>;
+  updateCategory: (id: string, data: Partial<Category>) => Promise<Category>;
+  deleteCategory: (id: string) => Promise<void>;
+  refreshCategories: () => Promise<void>;
+  clients_list: Client[];
+  addClient: (client: Omit<Client, 'id'>) => Promise<Client>;
+  updateClient: (id: string, data: Partial<Client>) => Promise<Client>;
+  deleteClient: (id: string) => Promise<void>;
+  refreshClients: () => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextType | null>(null);
@@ -42,6 +65,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
   const [products, setProducts] = useState<Product[]>([]);
   const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [categories_list, setCategoriesList] = useState<Category[]>([]);
+  const [clients_list, setClientsList] = useState<Client[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
   const refreshProducts = useCallback(async () => {
@@ -65,11 +90,31 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
+  const refreshCategories = useCallback(async () => {
+    try {
+      const data = await fetchCategories();
+      setCategoriesList(data);
+    } catch (err) {
+      console.error('Failed to fetch categories:', err);
+    }
+  }, []);
+
+  const refreshClients = useCallback(async () => {
+    try {
+      const data = admin ? await fetchClientsAll() : await fetchClients();
+      setClientsList(data);
+    } catch (err) {
+      console.error('Failed to fetch clients:', err);
+    }
+  }, [admin]);
+
   // Load public data on mount
   useEffect(() => {
     refreshProducts();
     refreshCertifications();
-  }, [refreshProducts, refreshCertifications]);
+    refreshCategories();
+    refreshClients();
+  }, [refreshProducts, refreshCertifications, refreshCategories, refreshClients]);
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
@@ -124,6 +169,40 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setCertifications(prev => prev.filter(c => c.id !== id));
   }, []);
 
+  const addCategory = useCallback(async (category: Omit<Category, 'id'>) => {
+    const newCat = await createCategoryApi(category);
+    setCategoriesList(prev => [newCat, ...prev]);
+    return newCat;
+  }, []);
+
+  const updateCategoryFn = useCallback(async (id: string, data: Partial<Category>) => {
+    const updated = await updateCategoryApi(id, data);
+    setCategoriesList(prev => prev.map(c => (c.id === id ? updated : c)));
+    return updated;
+  }, []);
+
+  const deleteCategoryFn = useCallback(async (id: string) => {
+    await deleteCategoryApi(id);
+    setCategoriesList(prev => prev.filter(c => c.id !== id));
+  }, []);
+
+  const addClient = useCallback(async (client: Omit<Client, 'id'>) => {
+    const newClient = await createClientApi(client);
+    setClientsList(prev => [newClient, ...prev]);
+    return newClient;
+  }, []);
+
+  const updateClientFn = useCallback(async (id: string, data: Partial<Client>) => {
+    const updated = await updateClientApi(id, data);
+    setClientsList(prev => prev.map(c => (c.id === id ? updated : c)));
+    return updated;
+  }, []);
+
+  const deleteClientFn = useCallback(async (id: string) => {
+    await deleteClientApi(id);
+    setClientsList(prev => prev.filter(c => c.id !== id));
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       admin,
@@ -139,6 +218,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       refreshProducts,
       addCertification,
       deleteCertification,
+      categories_list,
+      addCategory,
+      updateCategory: updateCategoryFn,
+      deleteCategory: deleteCategoryFn,
+      refreshCategories,
+      clients_list,
+      addClient,
+      updateClient: updateClientFn,
+      deleteClient: deleteClientFn,
+      refreshClients,
     }),
     [
       admin,
@@ -153,6 +242,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       refreshProducts,
       addCertification,
       deleteCertification,
+      categories_list,
+      addCategory,
+      updateCategoryFn,
+      deleteCategoryFn,
+      refreshCategories,
+      clients_list,
+      addClient,
+      updateClientFn,
+      deleteClientFn,
+      refreshClients,
     ]
   );
 

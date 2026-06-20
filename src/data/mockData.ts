@@ -102,12 +102,18 @@ export const mockCertifications: Certification[] = [
 
 export const productCategories = [
   'All',
-  'Adhesives & Sealants',
-  'Coatings & Paints',
-  'Lubricants, Oils, & Greases',
-  'Mechanical Items & Consumables',
-  'Cleaners & NDT Chemicals',
+  'Adhesives',
+  'Coatings',
+  'Mechanical Items',
+  'Cleaners',
+  'Lubricants',
+  'Mechanical Consumables',
   'Tapes',
+  'NDT Chemicals',
+  'Oils',
+  'Paints',
+  'Greases',
+  'Sealants',
 ];
 
 

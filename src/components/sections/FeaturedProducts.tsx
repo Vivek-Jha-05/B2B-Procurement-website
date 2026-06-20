@@ -11,7 +11,7 @@ const FeaturedProducts: React.FC = () => {
   const featured = products.slice(0, 4);
 
   return (
-    <section className="section-pad bg-white border-t border-[#F5ECD5]">
+    <section className="pt-10 md:pt-14 pb-20 md:pb-28 bg-white border-t border-[#F5ECD5]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">

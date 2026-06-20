@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import mongoose from 'mongoose';
 import Certification from '../models/Certification';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, requireRole } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import cloudinary from '../config/cloudinary';
 
@@ -40,6 +40,7 @@ router.get(
 router.post(
   '/',
   requireAuth,
+  requireRole(['admin', 'super_admin']),
   validate(certificationSchema),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -55,6 +56,7 @@ router.post(
 router.put(
   '/:id',
   requireAuth,
+  requireRole(['admin', 'super_admin']),
   validate(updateCertificationSchema),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -87,6 +89,7 @@ router.put(
 router.delete(
   '/:id',
   requireAuth,
+  requireRole(['admin', 'super_admin']),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;

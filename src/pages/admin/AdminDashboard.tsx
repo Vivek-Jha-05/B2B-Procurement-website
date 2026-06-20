@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Package, Mail, Award, TrendingUp, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Package, Mail, Award, TrendingUp, Clock, CheckCircle2, AlertCircle, Layers, Handshake } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { useAdmin } from '../../context/AdminContext';
 import { Link } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { fetchLeads } from '../../api/leads';
 import type { ContactLead } from '../../types';
 
 const AdminDashboard: React.FC = () => {
-  const { products, certifications } = useAdmin();
+  const { products, certifications, categories_list, clients_list } = useAdmin();
   const [leads, setLeads] = useState<ContactLead[]>([]);
 
   useEffect(() => {
@@ -60,6 +60,20 @@ const AdminDashboard: React.FC = () => {
       color: 'bg-purple-50 text-purple-600',
       href: '/admin/certifications',
     },
+    {
+      label: 'Categories',
+      value: categories_list.length,
+      icon: Layers,
+      color: 'bg-emerald-50 text-emerald-600',
+      href: '/admin/categories',
+    },
+    {
+      label: 'Clients',
+      value: clients_list.length,
+      icon: Handshake,
+      color: 'bg-indigo-50 text-indigo-600',
+      href: '/admin/clients',
+    },
   ];
 
   const statusConfig = {
@@ -71,7 +85,7 @@ const AdminDashboard: React.FC = () => {
   return (
     <AdminLayout title="Dashboard" subtitle="Overview of your procurement portal">
       {/* Stats */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         {stats.map(({ label, value, icon: Icon, color, href }) => (
           <Link
             key={label}
@@ -159,6 +173,20 @@ const AdminDashboard: React.FC = () => {
             >
               <Award size={16} className="text-[#578E7E]" />
               Manage Certs
+            </Link>
+            <Link
+              to="/admin/categories"
+              className="flex items-center gap-3 p-3 bg-[#FFFAEC] rounded-sm border border-[#F5ECD5] hover:border-[#578E7E]/30 hover:shadow-sm transition-all text-sm font-medium text-[#3D3D3D]"
+            >
+              <Layers size={16} className="text-[#578E7E]" />
+              Manage Categories
+            </Link>
+            <Link
+              to="/admin/clients"
+              className="flex items-center gap-3 p-3 bg-[#FFFAEC] rounded-sm border border-[#F5ECD5] hover:border-[#578E7E]/30 hover:shadow-sm transition-all text-sm font-medium text-[#3D3D3D]"
+            >
+              <Handshake size={16} className="text-[#578E7E]" />
+              Manage Clients
             </Link>
             <a
               href="/"

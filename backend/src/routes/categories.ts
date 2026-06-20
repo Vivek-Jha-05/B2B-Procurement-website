@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import mongoose from 'mongoose';
-import Product from '../models/Product';
+import Category from '../models/Category';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { uploadSingle, uploadBufferToCloudinary } from '../middleware/upload';
@@ -9,88 +9,88 @@ import cloudinary from '../config/cloudinary';
 
 const router = Router();
 
-const productSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(200, 'Name too long').trim(),
-  category: z.string().min(1, 'Category is required').trim(),
+const categorySchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name too long').trim(),
   description: z
     .string()
     .min(1, 'Description is required')
-    .max(2000, 'Description too long')
+    .max(500, 'Description too long')
     .trim(),
   imageUrl: z.string().url('Invalid image URL').optional().or(z.literal('')),
+  order: z.number().int().min(0).optional(),
 });
 
-const updateProductSchema = productSchema.partial();
+const updateCategorySchema = categorySchema.partial();
 
-// GET /api/products — Public
+// GET /api/categories — Public
 router.get(
   '/',
   async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const products = await Product.find({ isActive: true })
-        .select('name category description imageUrl createdAt')
-        .sort({ createdAt: -1 })
+      const categories = await Category.find({ isActive: true })
+        .select('name description imageUrl order createdAt')
+        .sort({ order: 1, name: 1 })
         .lean();
 
       // Cache for 60s, stale-while-revalidate for 5min
       res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
-      res.json(products);
+      res.json(categories);
     } catch (err) {
       next(err);
     }
   }
 );
 
-// POST /api/products — Admin only
+// POST /api/categories — Admin only
 router.post(
   '/',
   requireAuth,
   requireRole(['admin', 'super_admin']),
-  validate(productSchema),
+  validate(categorySchema),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const product = await Product.create(req.body);
-      res.status(201).json(product);
+      const category = await Category.create(req.body);
+      res.status(201).json(category);
     } catch (err) {
       next(err);
     }
   }
 );
 
-// PUT /api/products/:id — Admin only
+// PUT /api/categories/:id — Admin only
 router.put(
   '/:id',
   requireAuth,
   requireRole(['admin', 'super_admin']),
-  validate(updateProductSchema),
+  validate(updateCategorySchema),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
-        res.status(400).json({ error: 'Invalid product ID' });
+        res.status(400).json({ error: 'Invalid category ID' });
         return;
       }
 
-      const product = await Product.findByIdAndUpdate(
+      const category = await Category.findByIdAndUpdate(
         id,
         { $set: req.body },
         { new: true, runValidators: true }
       );
 
-      if (!product) {
-        res.status(404).json({ error: 'Product not found' });
+      if (!category) {
+        res.status(404).json({ error: 'Category not found' });
         return;
       }
 
-      res.json(product);
+      res.json(category);
     } catch (err) {
       next(err);
     }
   }
 );
 
-// DELETE /api/products/:id — Admin only
+// DELETE /api/categories/:id — Admin only
 router.delete(
   '/:id',
   requireAuth,
@@ -100,27 +100,27 @@ router.delete(
       const { id } = req.params;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
-        res.status(400).json({ error: 'Invalid product ID' });
+        res.status(400).json({ error: 'Invalid category ID' });
         return;
       }
 
-      const product = await Product.findById(id);
+      const category = await Category.findById(id);
 
-      if (!product) {
-        res.status(404).json({ error: 'Product not found' });
+      if (!category) {
+        res.status(404).json({ error: 'Category not found' });
         return;
       }
 
       // Delete from Cloudinary if exists
-      if (product.cloudinaryPublicId) {
+      if (category.cloudinaryPublicId) {
         try {
-          await cloudinary.uploader.destroy(product.cloudinaryPublicId);
+          await cloudinary.uploader.destroy(category.cloudinaryPublicId);
         } catch (cloudinaryErr) {
           console.error('Cloudinary deletion failed:', cloudinaryErr);
         }
       }
 
-      await product.deleteOne();
+      await category.deleteOne();
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -128,7 +128,7 @@ router.delete(
   }
 );
 
-// POST /api/products/:id/image — Admin only
+// POST /api/categories/:id/image — Admin only
 router.post(
   '/:id/image',
   requireAuth,
@@ -144,7 +144,7 @@ router.post(
       const { id } = req.params;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
-        res.status(400).json({ error: 'Invalid product ID' });
+        res.status(400).json({ error: 'Invalid category ID' });
         return;
       }
 
@@ -154,15 +154,15 @@ router.post(
       }
 
       // Upload buffer to Cloudinary using upload_stream (v2 compatible)
-      const cloudinaryResult = await uploadBufferToCloudinary(req.file.buffer);
+      const cloudinaryResult = await uploadBufferToCloudinary(req.file.buffer, 'prosource/categories');
 
       // Delete old image from Cloudinary if it exists
-      const existing = await Product.findById(id);
+      const existing = await Category.findById(id);
       if (existing?.cloudinaryPublicId) {
         await cloudinary.uploader.destroy(existing.cloudinaryPublicId).catch(console.error);
       }
 
-      const product = await Product.findByIdAndUpdate(
+      const category = await Category.findByIdAndUpdate(
         id,
         {
           $set: {
@@ -173,12 +173,12 @@ router.post(
         { new: true }
       );
 
-      if (!product) {
-        res.status(404).json({ error: 'Product not found' });
+      if (!category) {
+        res.status(404).json({ error: 'Category not found' });
         return;
       }
 
-      res.json(product);
+      res.json(category);
     } catch (err) {
       next(err);
     }

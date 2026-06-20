@@ -16,6 +16,8 @@ import productRoutes from "./routes/products";
 import leadRoutes from "./routes/leads";
 import contactRoutes from "./routes/contact";
 import certificationRoutes from "./routes/certifications";
+import categoryRoutes from './routes/categories';
+import clientRoutes from './routes/clients';
 
 const app = express();
 
@@ -152,6 +154,10 @@ app.use("/api/leads", leadRoutes);
 app.use("/api/contact", contactRateLimit, contactRoutes);
 
 app.use("/api/certifications", certificationRoutes);
+
+app.use('/api/categories', categoryRoutes);
+
+app.use('/api/clients', clientRoutes);
 
 // 404 handler for unmatched API routes
 app.use("/api/*", (_req: Request, res: Response) => {
