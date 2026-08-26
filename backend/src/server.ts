@@ -6,6 +6,8 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+import path from "path";
+import fs from "fs";
 
 import connectDB from "./config/db";
 import errorHandler from "./middleware/errorHandler";
@@ -39,8 +41,8 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
         imgSrc: [
           "'self'",
           "data:",
@@ -50,6 +52,8 @@ app.use(
         connectSrc: [
           "'self'",
           "https://*.vercel.app",
+          "https://*.railway.app",
+          "https://*.up.railway.app",
           "https://*.vivek-jha.me",
           "https://aprsvs.com",
           ...allowedOrigins,
@@ -67,7 +71,7 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, Postman)
+      // Allow requests with no origin (mobile apps, curl, Postman, same-origin)
       if (!origin) return callback(null, true);
       
       // Allow explicitly listed origins
@@ -76,6 +80,9 @@ app.use(
       // Allow any Vercel deployment (*.vercel.app)
       if (/\.vercel\.app$/i.test(origin)) return callback(null, true);
       
+      // Allow any Railway deployment (*.up.railway.app or *.railway.app)
+      if (/\.(up\.railway\.app|railway\.app)$/i.test(origin)) return callback(null, true);
+
       // Allow any subdomains of vivek-jha.me or aprsvs.com
       if (/\.(vivek-jha\.me|aprsvs\.com)$/i.test(origin)) return callback(null, true);
       
@@ -191,6 +198,31 @@ app.use("/api/*", (_req: Request, res: Response) => {
 });
 
 // ──────────────────────────────────────────────
+// Static frontend assets & SPA fallback
+// ──────────────────────────────────────────────
+const possibleClientPaths = [
+  process.env.CLIENT_DIST_PATH,
+  path.resolve(__dirname, "../../dist"),
+  path.resolve(__dirname, "../../../dist"),
+  path.resolve(process.cwd(), "dist"),
+  path.resolve(process.cwd(), "../dist"),
+].filter(Boolean) as string[];
+
+const clientBuildPath = possibleClientPaths.find((p) =>
+  fs.existsSync(path.join(p, "index.html")),
+);
+
+if (clientBuildPath) {
+  console.log(`📦 Serving static frontend from: ${clientBuildPath}`);
+  app.use(express.static(clientBuildPath));
+
+  // SPA fallback for client-side routing (React Router)
+  app.get("*", (_req: Request, res: Response) => {
+    res.sendFile(path.join(clientBuildPath, "index.html"));
+  });
+}
+
+// ──────────────────────────────────────────────
 // Global error handler (must be last)
 // ──────────────────────────────────────────────
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
@@ -206,9 +238,9 @@ const startServer = async (): Promise<void> => {
   try {
     await connectDB();
 
-    app.listen(PORT, () => {
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(
-        `🚀 APR Services API running on http://localhost:${PORT} [${process.env.NODE_ENV || "development"}]`,
+        `🚀 APR Services running on http://0.0.0.0:${PORT} [${process.env.NODE_ENV || "development"}]`,
       );
     });
   } catch (err) {
